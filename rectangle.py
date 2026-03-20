@@ -15,7 +15,18 @@ class Rectangle:
     
     def test_y(a: "Rectangle", b: "Rectangle"):
         """
-        Checks if one rectangle is a sub-line adjacent to another via a vertical line.
+        Classifies vertical-edge adjacency between two rectangles that share a
+        vertical boundary (i.e. a.x1 == b.x2 or a.x2 == b.x1).
+
+        Prints one of:
+        - "sub-line adjacent" if one rectangle's y-span is strictly contained
+          within the other's.
+        - "partially adjacent" otherwise (y-spans overlap but neither contains
+          the other).
+
+        Args:
+            a: First rectangle.
+            b: Second rectangle.
         """
         if a.y1 < b.y1 and a.y2 > b.y2:
             print(f"Rectangle {b.name} is sub-line adjacent to {a.name}.")
@@ -26,7 +37,18 @@ class Rectangle:
 
     def test_x(a: "Rectangle", b: "Rectangle"):
         """
-        Checks if one rectangle is a sub-line adjacent to another via a horizontal line.
+        Classifies horizontal-edge adjacency between two rectangles that share a
+        horizontal boundary (i.e. a.y1 == b.y2 or a.y2 == b.y1).
+
+        Prints one of:
+        - "sub-line adjacent" if one rectangle's x-span is strictly contained
+          within the other's.
+        - "partially adjacent" otherwise (x-spans overlap but neither contains
+          the other).
+
+        Args:
+            a: First rectangle.
+            b: Second rectangle.
         """
         if a.x1 < b.x1 and a.x2 > b.x2:
             print(f"Rectangle {b.name} is sub-line adjacent to {a.name}.")
@@ -37,7 +59,18 @@ class Rectangle:
     
     def rectangle_edges(a: "Rectangle"):
         """
-        Produces the edges of a rectangle as a list of tuples. Starts at the bottom edge and goes counter-clockwise. 
+        Returns the four edges of the rectangle as line segments.
+
+        Each edge is a tuple of two (x, y) endpoint tuples. The order is
+        bottom, right, top, left (counter-clockwise starting from the
+        bottom edge).
+
+        Args:
+            a: The rectangle whose edges are produced.
+
+        Returns:
+            list[tuple[tuple[float, float], tuple[float, float]]]:
+                Four edge segments.
         """
         return [
             ((a.x1, a.y1), (a.x2, a.y1)), # bottom
@@ -48,7 +81,21 @@ class Rectangle:
 
     def segment_intersection(seg1, seg2):
         """
-        Checks if two segments intersect and returns the points of intersection.
+        Computes the intersection of two axis-aligned line segments.
+
+        Handles all combinations of vertical and horizontal segments:
+        perpendicular crossings yield a point, collinear overlaps yield a
+        point (if they meet at exactly one endpoint) or a segment.
+
+        Args:
+            seg1: First segment as ((x1, y1), (x2, y2)).
+            seg2: Second segment as ((x3, y3), (x4, y4)).
+
+        Returns:
+            list[tuple[str, tuple]]: A list of intersection results, each
+                being either ("point", (x, y)) or
+                ("segment", ((x1, y1), (x2, y2))).
+                Empty list if the segments do not intersect.
         """
         (x1, y1), (x2, y2) = seg1
         (x3, y3), (x4, y4) = seg2
@@ -104,7 +151,17 @@ class Rectangle:
     
     def produce_points_of_intersection(a: "Rectangle", b: "Rectangle"):
         """
-        Produces the points of intersection of two rectangles and the segments of intersection.
+        Finds all intersection geometry between two rectangles by testing
+        every pair of edges (4 x 4 = 16 pairs).
+
+        Results are printed as a dict with three keys:
+        - "has_intersection": bool indicating any intersection exists.
+        - "points_of_intersection": sorted list of (x, y) intersection points.
+        - "segments_of_intersection": sorted list of shared edge segments.
+
+        Args:
+            a: First rectangle.
+            b: Second rectangle.
         """
         edges1 = Rectangle.rectangle_edges(a)
         edges2 = Rectangle.rectangle_edges(b)
@@ -135,7 +192,19 @@ class Rectangle:
         
     def intersects(a: "Rectangle", b: "Rectangle") -> bool:
         """
-        Checks if two rectangles intersect. Does not include adjacent rectangles.
+        Determines whether two rectangles have overlapping interiors.
+
+        Adjacency (shared edge only) and containment (one fully inside the
+        other) are excluded — this returns True only when the interiors
+        genuinely cross. When True, also prints the intersection points and
+        segments via ``produce_points_of_intersection``.
+
+        Args:
+            a: First rectangle.
+            b: Second rectangle.
+
+        Returns:
+            bool: True if the rectangles' interiors overlap.
         """
         if not (a.x2 <= b.x1 or a.x1 >= b.x2 or a.y2 <= b.y1 or a.y1 >= b.y2) and not (b.x1 >= a.x1 and b.x2 <= a.x2 and b.y1 >= a.y1 and b.y2 <= a.y2):
             Rectangle.produce_points_of_intersection(a, b)
@@ -145,7 +214,22 @@ class Rectangle:
 
     def is_adjacent(a: "Rectangle", b: "Rectangle") -> bool:
         """
-        Checks if two rectangles are adjacent. Does not include rectangles that share corners.
+        Determines whether two rectangles share an edge segment.
+
+        Corner-only contact (a single shared point) does not count. When
+        adjacency is detected, the kind is printed:
+        - *proper* — one shared edge is identical (full side match).
+        - *sub-line* — one shared edge is strictly contained within the other's
+          (delegated to ``test_x`` / ``test_y``).
+        - *partial* — the edges overlap but neither contains the other's
+          (also delegated to ``test_x`` / ``test_y``).
+
+        Args:
+            a: First rectangle.
+            b: Second rectangle.
+
+        Returns:
+            bool: True if the rectangles are adjacent along an edge.
         """
         if (a.x1 == b.x1 and a.x2 == b.x2) or (a.y1 == b.y1 and a.y2 == b.y2):
             print(f"Rectangles {a.name} and {b.name} are adjacent proper, they share a side.")
@@ -162,13 +246,31 @@ class Rectangle:
 
     def is_contained(a: "Rectangle", b: "Rectangle") -> bool:
         """
-        Checks if the first rectangle is contained within the second rectangle.
+        Checks whether rectangle ``a`` lies entirely within rectangle ``b``.
+
+        The check is inclusive: edges of ``a`` may coincide with edges of
+        ``b`` and the result is still True.
+
+        Args:
+            a: The potentially contained rectangle.
+            b: The potentially containing rectangle.
+
+        Returns:
+            bool: True if every point of ``a`` is within or on the boundary
+                of ``b``.
         """
         return (a.x1 >= b.x1 and a.x2 <= b.x2 and a.y1 >= b.y1 and a.y2 <= b.y2)
 
     def compare_rectangles(rectangles: list["Rectangle"]):
         """
-        Compares all rectangles in the list to each other.
+        Performs a pairwise comparison of all rectangles and prints the
+        spatial relationship for every unique pair.
+
+        Each pair is classified (in priority order) as: intersecting,
+        adjacent, contained, or apart.
+
+        Args:
+            rectangles: List of Rectangle instances to compare.
         """
         n = len(rectangles)
         for i in range(n):

@@ -1,6 +1,6 @@
 # Rectangle Spatial Relations
 
-A Python library for analyzing spatial relationships between axis-aligned rectangles. Given a set of rectangles defined by their bottom-left and top-right corners, it determines whether any two rectangles **intersect**, are **adjacent**, are **contained** within one another, or are **apart**.
+A Python library for analyzing spatial relationships between rectangles. Given a set of rectangles defined by their bottom-left and top-right corners, it determines whether any two rectangles **intersect**, are **adjacent**, are **contained** within one another, or are **apart**.
 
 ## Spatial Relations
 

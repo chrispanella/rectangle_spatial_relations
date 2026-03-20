@@ -50,7 +50,7 @@ def main():
     print(Rectangle.is_contained(rectE, rectF)) # false
     print(Rectangle.is_contained(rectF, rectE)) # false
     print(Rectangle.is_contained(rectJ, rectK)) # false
-    print(Rectangle.is_contained(rectK, rectL)) # true
+    print(Rectangle.is_contained(rectK, rectL)) # false
     print(Rectangle.is_contained(rectL, rectK)) # true
 
 if __name__ == "__main__":
